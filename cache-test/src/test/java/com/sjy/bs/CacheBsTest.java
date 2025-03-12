@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 缓存引导类测试
+ *
  * @author binbin.hou
  * @since 0.0.2
  */
@@ -22,12 +23,14 @@ public class CacheBsTest {
 
     /**
      * 大小指定测试
+     *
      * @since 0.0.2
      */
     @Test
     public void helloTest() {
-        ICache<String, String> cache = CacheBs.<String,String>newInstance()
-                .size(2)
+        int maxSize = 4;
+        ICache<String, String> cache = CacheBs.<String, String>newInstance()
+                .size(maxSize)
                 .build();
 
         cache.put("1", "1");
@@ -35,18 +38,19 @@ public class CacheBsTest {
         cache.put("3", "3");
         cache.put("4", "4");
 
-        Assert.assertEquals(2, cache.size());
+        Assert.assertEquals(maxSize, cache.size());
         System.out.println(cache.keySet());
     }
 
     /**
      * 配置指定测试
+     *
      * @since 0.0.2
      */
     @Test
     public void configTest() {
-        ICache<String, String> cache = CacheBs.<String,String>newInstance()
-                .map(Maps.<String,String>hashMap())
+        ICache<String, String> cache = CacheBs.<String, String>newInstance()
+                .map(Maps.<String, String>hashMap())
                 .evict(CacheEvicts.<String, String>fifo())
                 .size(2)
                 .build();
@@ -62,11 +66,12 @@ public class CacheBsTest {
 
     /**
      * 过期测试
+     *
      * @since 0.0.3
      */
     @Test
     public void expireTest() throws InterruptedException {
-        ICache<String, String> cache = CacheBs.<String,String>newInstance()
+        ICache<String, String> cache = CacheBs.<String, String>newInstance()
                 .size(3)
                 .build();
 
@@ -83,11 +88,12 @@ public class CacheBsTest {
 
     /**
      * 缓存删除监听器
+     *
      * @since 0.0.6
      */
     @Test
     public void cacheRemoveListenerTest() {
-        ICache<String, String> cache = CacheBs.<String,String>newInstance()
+        ICache<String, String> cache = CacheBs.<String, String>newInstance()
                 .size(1)
                 .addRemoveListener(new MyRemoveListener<String, String>())
                 .build();
@@ -98,11 +104,12 @@ public class CacheBsTest {
 
     /**
      * 加载接口测试
+     *
      * @since 0.0.7
      */
     @Test
     public void loadTest() {
-        ICache<String, String> cache = CacheBs.<String,String>newInstance()
+        ICache<String, String> cache = CacheBs.<String, String>newInstance()
                 .load(new MyCacheLoad())
                 .build();
 
@@ -111,11 +118,12 @@ public class CacheBsTest {
 
     /**
      * 持久化接口测试
+     *
      * @since 0.0.7
      */
     @Test
     public void persistRdbTest() throws InterruptedException {
-        ICache<String, String> cache = CacheBs.<String,String>newInstance()
+        ICache<String, String> cache = CacheBs.<String, String>newInstance()
                 .load(new MyCacheLoad())
                 .persist(CachePersists.<String, String>dbJson("1.rdb"))
                 .build();
@@ -126,11 +134,12 @@ public class CacheBsTest {
 
     /**
      * 加载接口测试
+     *
      * @since 0.0.8
      */
     @Test
     public void loadDbJsonTest() {
-        ICache<String, String> cache = CacheBs.<String,String>newInstance()
+        ICache<String, String> cache = CacheBs.<String, String>newInstance()
                 .load(CacheLoads.<String, String>dbJson("1.rdb"))
                 .build();
 
@@ -139,11 +148,12 @@ public class CacheBsTest {
 
     /**
      * 慢日志接口测试
+     *
      * @since 0.0.9
      */
     @Test
     public void slowLogTest() {
-        ICache<String, String> cache = CacheBs.<String,String>newInstance()
+        ICache<String, String> cache = CacheBs.<String, String>newInstance()
                 .addSlowListener(new MySlowListener())
                 .build();
 
@@ -154,11 +164,12 @@ public class CacheBsTest {
 
     /**
      * 持久化 AOF 接口测试
+     *
      * @since 0.0.10
      */
     @Test
     public void persistAofTest() throws InterruptedException {
-        ICache<String, String> cache = CacheBs.<String,String>newInstance()
+        ICache<String, String> cache = CacheBs.<String, String>newInstance()
                 .persist(CachePersists.<String, String>aof("1.aof"))
                 .build();
 
@@ -171,11 +182,12 @@ public class CacheBsTest {
 
     /**
      * 加载 AOF 接口测试
+     *
      * @since 0.0.10
      */
     @Test
     public void loadAofTest() throws InterruptedException {
-        ICache<String, String> cache = CacheBs.<String,String>newInstance()
+        ICache<String, String> cache = CacheBs.<String, String>newInstance()
                 .load(CacheLoads.<String, String>aof("default.aof"))
                 .build();
 
@@ -186,11 +198,12 @@ public class CacheBsTest {
 
     /**
      * LRU 驱除策略测试
+     *
      * @since 0.0.10
      */
     @Test
     public void lruEvictTest() throws InterruptedException {
-        ICache<String, String> cache = CacheBs.<String,String>newInstance()
+        ICache<String, String> cache = CacheBs.<String, String>newInstance()
                 .size(3)
                 .evict(CacheEvicts.<String, String>lru())
                 .build();
@@ -209,7 +222,7 @@ public class CacheBsTest {
 
     @Test
     public void lruDoubleListMapTest() throws InterruptedException {
-        ICache<String, String> cache = CacheBs.<String,String>newInstance()
+        ICache<String, String> cache = CacheBs.<String, String>newInstance()
                 .size(3)
                 .evict(CacheEvicts.<String, String>lruDoubleListMap())
                 .build();
@@ -228,11 +241,12 @@ public class CacheBsTest {
 
     /**
      * 基于 LinkedHashMap 实现
+     *
      * @since 0.0.12
      */
     @Test
-    public void lruLinkedHashMapTest()  {
-        ICache<String, String> cache = CacheBs.<String,String>newInstance()
+    public void lruLinkedHashMapTest() {
+        ICache<String, String> cache = CacheBs.<String, String>newInstance()
                 .size(3)
                 .evict(CacheEvicts.<String, String>lruLinkedHashMap())
                 .build();
@@ -251,11 +265,12 @@ public class CacheBsTest {
 
     /**
      * 基于 LRU 2Q 实现
+     *
      * @since 0.0.13
      */
     @Test
-    public void lruQ2Test()  {
-        ICache<String, String> cache = CacheBs.<String,String>newInstance()
+    public void lruQ2Test() {
+        ICache<String, String> cache = CacheBs.<String, String>newInstance()
                 .size(3)
                 .evict(CacheEvicts.<String, String>lru2Q())
                 .build();
@@ -274,11 +289,12 @@ public class CacheBsTest {
 
     /**
      * 基于 LRU-2 实现
+     *
      * @since 0.0.13
      */
     @Test
-    public void lru2Test()  {
-        ICache<String, String> cache = CacheBs.<String,String>newInstance()
+    public void lru2Test() {
+        ICache<String, String> cache = CacheBs.<String, String>newInstance()
                 .size(3)
                 .evict(CacheEvicts.<String, String>lru2())
                 .build();
@@ -297,11 +313,12 @@ public class CacheBsTest {
 
     /**
      * 基于 LFU 实现
+     *
      * @since 0.0.14
      */
     @Test
-    public void lfuTest()  {
-        ICache<String, String> cache = CacheBs.<String,String>newInstance()
+    public void lfuTest() {
+        ICache<String, String> cache = CacheBs.<String, String>newInstance()
                 .size(3)
                 .evict(CacheEvicts.<String, String>lfu())
                 .build();
@@ -321,11 +338,12 @@ public class CacheBsTest {
 
     /**
      * 基于 clock 算法 实现
+     *
      * @since 0.0.15
      */
     @Test
-    public void clockTest()  {
-        ICache<String, String> cache = CacheBs.<String,String>newInstance()
+    public void clockTest() {
+        ICache<String, String> cache = CacheBs.<String, String>newInstance()
                 .size(3)
                 .evict(CacheEvicts.<String, String>clock())
                 .build();
