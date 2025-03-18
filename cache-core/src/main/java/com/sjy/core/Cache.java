@@ -1,15 +1,15 @@
 package com.sjy.core;
 
+import com.github.houbb.heaven.util.lang.ObjectUtil;
 import com.sjy.annotation.CacheInterceptor;
 import com.sjy.api.*;
 import com.sjy.constant.enums.CacheRemoveType;
 import com.sjy.exception.CacheRuntimeException;
 import com.sjy.support.evict.CacheEvictContext;
-import com.sjy.support.expire.CacheExpire;
+import com.sjy.support.expire.CacheExpireSort;
 import com.sjy.support.listener.remove.CacheRemoveListenerContext;
 import com.sjy.support.persist.InnerCachePersist;
 import com.sjy.support.proxy.CacheProxy;
-import com.github.houbb.heaven.util.lang.ObjectUtil;
 
 import java.util.*;
 
@@ -169,7 +169,7 @@ public class Cache<K,V> implements ICache<K,V> {
      * @since 0.0.7
      */
     public void init() {
-        this.expire = new CacheExpire<>(this);
+        this.expire = new CacheExpireSort<>(this);
         this.load.load(this);
 
         // 初始化持久化

@@ -15,8 +15,8 @@ public interface ICacheEvict<K, V> {
      * @since 0.0.2
      * @return 被移除的明细，没有时返回 null
      */
-    ICacheEntry<K,V> evict(final ICacheEvictContext<K, V> context);
 
+    ICacheEntry<K,V> evict(final ICacheEvictContext<K, V> context);
     /**
      * 更新 key 信息
      * @param key key

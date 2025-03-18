@@ -1,378 +1,315 @@
-# 项目简介
+# 项目简介  
 
-[Like-Redis-Cache](https://github.com/shuaiqidexiaosu/Like-Redis-Cache) 用于实现一个可拓展的本地缓存。
+- [Like-Redis-Cache](https://github.com/shuaiqidexiaosu/Like-Redis-Cache) 用于实现一个可拓展的本地缓存。  
+- 有高性能的地方，就有 cache。  
 
-有人的地方，就有江湖。
+## 创作目的  
 
-有高性能的地方，就有 cache。
+- 为日常开发提供一套简单易用的缓存框架  
+- 便于后期多级缓存开发  
+- 学以致用，开发一个类似于 redis 的渐进式缓存框架  
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.houbb/cache/badge.svg)](http://mvnrepository.com/artifact/com.github.houbb/cache)
-[![Build Status](https://www.travis-ci.org/houbb/cache.svg?branch=master)](https://www.travis-ci.org/houbb/cache?branch=master)
-[![](https://img.shields.io/badge/license-Apache2-FF0080.svg)](https://github.com/houbb/cache/blob/master/LICENSE.txt)
-[![Open Source Love](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/houbb/cache)
+## 特性  
 
-## 创作目的
+- MVP 开发策略  
+- fluent 流式编程体验，纵享丝滑  
+- 支持 cache 固定大小  
+- 支持自定义 map 实现策略  
+- 支持 expire 过期特性  
+- 支持自定义 evict 驱除策略  
 
-- 为日常开发提供一套简单易用的缓存框架
+内置 FIFO 和 LRU 驱除策略  
 
-- 便于后期多级缓存开发
+- 支持自定义删除监听器  
+- 日志整合框架，自适应常见日志  
+- 支持 load 初始化和 persist 持久化  
 
-- 学以致用，开发一个类似于 redis 的渐进式缓存框架
+RDB 和 AOF 两种模式  
 
-## 特性
+# 快速开始  
 
-- MVP 开发策略
+## 准备  
 
-- fluent 流式编程体验，纵享丝滑
+JDK11 及其以上版本  
 
-- 支持 cache 固定大小
+Maven 3.X 及其以上版本  
 
-- 支持自定义 map 实现策略
+## maven 项目依赖  
+## 入门测试  
 
-- 支持 expire 过期特性
+默认为先进先出的策略，此时输出 keys，内容如下：  
 
-- 支持自定义 evict 驱除策略
+```  
+[3, 4]  
+```  
+## 项目结构
+- cache-api: 项目定义的各个接口, 定义可核心代码类的结构
+- cache-core: 核心代码类, 如: 淘汰算法, 慢监听器, 数据结构
+- cache-test: 测试包
+## 引导类配置属性  
 
-内置 FIFO 和 LRU 驱除策略
+`CacheBs` 作为缓存的引导类，支持 fluent 写法，编程更加优雅便捷。  
 
-- 支持自定义删除监听器
+上述配置等价于：  
 
-- 日志整合框架，自适应常见日志
+```java  
+ICache<String, String> cache = CacheBs.<String, String>newInstance()  
+        .map(Maps.<String, String>hashMap())        .evict(CacheEvicts.<String, String>fifo())        .size(2)        .build();  
+```  
 
-- 支持 load 初始化和 persist 持久化
+## 淘汰策略  
 
-RDB 和 AOF 两种模式
+目前内置了几种淘汰策略，可以直接通过 `CacheEvicts` 工具类创建。  
 
-# 快速开始
+| 策略               | 说明                                                |  
+|:-----------------|:--------------------------------------------------|  
+| none             | 没有任何淘汰策略                                          |  
+| fifo             | 先进先出（默认策略）                                        |  
+| lru              | 最基本的朴素 LRU 策略，性能一般                                |  
+| lruDoubleListMap | 基于双向链表+MAP 实现的朴素 LRU，性能优于 lru                     |  
+| lruLinkedHashMap | 基于 LinkedHashMap 实现的朴素 LRU，与 lruDoubleListMap 差不多 |  
+| lru2Q            | 基于 LRU 2Q 的改进版 LRU 实现，命中率优于朴素LRU                  |  
+| lru2             | 基于 LRU-2 的改进版 LRU 实现，命中率优于 lru2Q                  |  
 
-## 准备
+## 过期支持  
 
-JDK11 及其以上版本
+```java  
+ICache<String, String> cache = CacheBs.<String, String>newInstance()  
+        .size(3)        .build();  
+cache.  
 
-Maven 3.X 及其以上版本
+put("1","1");  
+cache.  
 
-## maven 项目依赖
-## 入门测试
+put("2","2");  
 
+cache.  
 
-默认为先进先出的策略，此时输出 keys，内容如下：
+expire("1",10);  
+Assert.  
 
-```
-[3, 4]
-```
+assertEquals(2,cache.size());  
 
-## 引导类配置属性
+        TimeUnit.MILLISECONDS.  
+sleep(50);  
+Assert.  
 
-`CacheBs` 作为缓存的引导类，支持 fluent 写法，编程更加优雅便捷。
+assertEquals(1,cache.size());  
+        System.out.  
+println(cache.keySet());  
+```  
 
-上述配置等价于：
+`cache.expire("1", 10);` 指定对应的 key 在 10ms 后过期。  
 
-```java
-ICache<String, String> cache = CacheBs.<String, String>newInstance()
-        .map(Maps.<String, String>hashMap())
-        .evict(CacheEvicts.<String, String>fifo())
-        .size(2)
-        .build();
-```
+# 删除监听器  
 
-## 淘汰策略
+## 说明  
 
-目前内置了几种淘汰策略，可以直接通过 `CacheEvicts` 工具类创建。
+淘汰和过期，这些都是缓存的内部行为。  
 
-| 策略               | 说明                                                |
-|:-----------------|:--------------------------------------------------|
-| none             | 没有任何淘汰策略                                          |
-| fifo             | 先进先出（默认策略）                                        |
-| lru              | 最基本的朴素 LRU 策略，性能一般                                |
-| lruDoubleListMap | 基于双向链表+MAP 实现的朴素 LRU，性能优于 lru                     |
-| lruLinkedHashMap | 基于 LinkedHashMap 实现的朴素 LRU，与 lruDoubleListMap 差不多 |
-| lru2Q            | 基于 LRU 2Q 的改进版 LRU 实现，命中率优于朴素LRU                  |
-| lru2             | 基于 LRU-2 的改进版 LRU 实现，命中率优于 lru2Q                  |
+如果用户也关心的话，可以自定义删除监听器。  
 
-## 过期支持
+## 自定义监听器  
 
-```java
-ICache<String, String> cache = CacheBs.<String, String>newInstance()
-        .size(3)
-        .build();
+直接实现 `ICacheRemoveListener` 接口即可。  
 
-cache.
+```java  
+public class MyRemoveListener<K, V> implements ICacheRemoveListener<K, V> {  
 
-put("1","1");
-cache.
+    @Override    public void listen(ICacheRemoveListenerContext<K, V> context) {        System.out.println("【删除提示】可恶，我竟然被删除了！" + context.key());  
+    }  
+}  
+```  
 
-put("2","2");
+## 使用  
 
-cache.
+```java  
+ICache<String, String> cache = CacheBs.<String, String>newInstance()  
+        .size(1)        .addRemoveListener(new MyRemoveListener<String, String>())        .build();  
+cache.  
 
-expire("1",10);
-Assert.
+put("1","1");  
+cache.  
 
-assertEquals(2,cache.size());
+put("2","2");  
+```  
 
-        TimeUnit.MILLISECONDS.
+- 测试日志  
 
-sleep(50);
-Assert.
+```  
+【删除提示】可恶，我竟然被删除了！2  
+```  
 
-assertEquals(1,cache.size());
-        System.out.
+# 添加慢操作监听器  
 
-println(cache.keySet());
-```
+## 说明  
 
-`cache.expire("1", 10);` 指定对应的 key 在 10ms 后过期。
+redis 中会存储慢操作的相关日志信息，主要是由两个参数构成：  
 
-# 删除监听器
+（1）slowlog-log-slower-than 预设阈值,它的单位是毫秒(1秒=1000000微秒)默认值是10000  
 
-## 说明
+（2）slowlog-max-len 最多存储多少条的慢日志记录  
 
-淘汰和过期，这些都是缓存的内部行为。
+不过 redis 是直接存储到内存中，而且有长度限制。  
 
-如果用户也关心的话，可以自定义删除监听器。
+根据实际工作体验，如果我们可以添加慢日志的监听，然后有对应的存储或者报警，这样更加方便问题的分析和快速反馈。  
 
-## 自定义监听器
+所以我们引入类似于删除的监听器。  
 
-直接实现 `ICacheRemoveListener` 接口即可。
+## 自定义监听器  
 
-```java
-public class MyRemoveListener<K, V> implements ICacheRemoveListener<K, V> {
+实现接口 `ICacheSlowListener`  
 
-    @Override
-    public void listen(ICacheRemoveListenerContext<K, V> context) {
-        System.out.println("【删除提示】可恶，我竟然被删除了！" + context.key());
-    }
+这里每一个监听器都可以指定自己的慢日志阈值，便于分级处理。  
 
-}
-```
+```java  
+public class MySlowListener implements ICacheSlowListener {  
 
-## 使用
+    @Override    public void listen(ICacheSlowListenerContext context) {        System.out.println("【慢日志】name: " + context.methodName());  
+    }  
+    @Override    public long slowerThanMills() {        return 0;    }  
+}  
+```  
 
-```java
-ICache<String, String> cache = CacheBs.<String, String>newInstance()
-        .size(1)
-        .addRemoveListener(new MyRemoveListener<String, String>())
-        .build();
+## 使用  
 
-cache.
+```java  
+ICache<String, String> cache = CacheBs.<String, String>newInstance()  
+        .addSlowListener(new MySlowListener())        .build();  
+cache.  
 
-put("1","1");
-cache.
+put("1","2");  
+cache.  
 
-put("2","2");
-```
+get("1");  
+```  
 
-- 测试日志
+- 测试效果  
 
-```
-【删除提示】可恶，我竟然被删除了！2
-```
+```  
+[DEBUG] [2020-09-30 17:40:11.547] [main] [c.g.h.c.c.s.i.c.CacheInterceptorCost.before] - Cost start, method: put  
+[DEBUG] [2020-09-30 17:40:11.551] [main] [c.g.h.c.c.s.i.c.CacheInterceptorCost.after] - Cost end, method: put, cost: 10ms  
+【慢日志】name: put  
+[DEBUG] [2020-09-30 17:40:11.554] [main] [c.g.h.c.c.s.i.c.CacheInterceptorCost.before] - Cost start, method: get  
+[DEBUG] [2020-09-30 17:40:11.554] [main] [c.g.h.c.c.s.i.c.CacheInterceptorCost.after] - Cost end, method: get, cost: 1ms  
+【慢日志】name: get  
+```  
 
-# 添加慢操作监听器
+实际工作中，我们可以针对慢日志数据存储，便于后期分析。  
 
-## 说明
+也可以直接接入报警系统，及时反馈问题。  
 
-redis 中会存储慢操作的相关日志信息，主要是由两个参数构成：
+# 添加 load 加载器  
 
-（1）slowlog-log-slower-than 预设阈值,它的单位是毫秒(1秒=1000000微秒)默认值是10000
+## 说明  
 
-（2）slowlog-max-len 最多存储多少条的慢日志记录
+有时候我们需要在 cache 初始化的时候，添加对应的数据初始化。  
 
-不过 redis 是直接存储到内存中，而且有长度限制。
+后期可以从文件等地方加载数据。  
 
-根据实际工作体验，如果我们可以添加慢日志的监听，然后有对应的存储或者报警，这样更加方便问题的分析和快速反馈。
+## 实现  
 
-所以我们引入类似于删除的监听器。
+实现 `ICacheLoad` 接口即可。  
 
-## 自定义监听器
+```java  
+public class MyCacheLoad implements ICacheLoad<String, String> {  
 
-实现接口 `ICacheSlowListener`
+    @Override    public void load(ICache<String, String> cache) {        cache.put("1", "1");        cache.put("2", "2");    }  
+}  
+```  
 
-这里每一个监听器都可以指定自己的慢日志阈值，便于分级处理。
+我们在缓存初始化的时候，放入 2 个元素。  
 
-```java
-public class MySlowListener implements ICacheSlowListener {
+## 测试效果  
 
-    @Override
-    public void listen(ICacheSlowListenerContext context) {
-        System.out.println("【慢日志】name: " + context.methodName());
-    }
+```java  
+ICache<String, String> cache = CacheBs.<String, String>newInstance()  
+        .load(new MyCacheLoad())        .build();  
+Assert.  
 
-    @Override
-    public long slowerThanMills() {
-        return 0;
-    }
+assertEquals(2,cache.size());  
+```  
 
-}
-```
+# 添加 persist 持久化类  
 
-## 使用
+## 说明  
 
-```java
-ICache<String, String> cache = CacheBs.<String, String>newInstance()
-        .addSlowListener(new MySlowListener())
-        .build();
+如果我们只是把文件放在内存中，应用重启信息就丢失了。  
 
-cache.
+有时候我们希望这些 key/value 信息可以持久化，存储到文件或者 database 中。  
 
-put("1","2");
-cache.
+## 持久化  
 
-get("1");
-```
+`CachePersists.<String, String>dbJson("1.rdb")` 指定将数据文件持久化到文件中。  
 
-- 测试效果
+定期执行，暂时全量持久化的间隔为 10min，后期考虑支持更多配置。  
 
-```
-[DEBUG] [2020-09-30 17:40:11.547] [main] [c.g.h.c.c.s.i.c.CacheInterceptorCost.before] - Cost start, method: put
-[DEBUG] [2020-09-30 17:40:11.551] [main] [c.g.h.c.c.s.i.c.CacheInterceptorCost.after] - Cost end, method: put, cost: 10ms
-【慢日志】name: put
-[DEBUG] [2020-09-30 17:40:11.554] [main] [c.g.h.c.c.s.i.c.CacheInterceptorCost.before] - Cost start, method: get
-[DEBUG] [2020-09-30 17:40:11.554] [main] [c.g.h.c.c.s.i.c.CacheInterceptorCost.after] - Cost end, method: get, cost: 1ms
-【慢日志】name: get
-```
+```java  
+public void persistTest() throws InterruptedException {  
+    ICache<String, String> cache = CacheBs.<String, String>newInstance()            .load(new MyCacheLoad())            .persist(CachePersists.<String, String>dbJson("1.rdb"))            .build();  
+    Assert.assertEquals(2, cache.size());    TimeUnit.SECONDS.sleep(5);}  
+```  
 
-实际工作中，我们可以针对慢日志数据存储，便于后期分析。
+- 1.rdb  
 
-也可以直接接入报警系统，及时反馈问题。
+文件内容如下：  
 
-# 添加 load 加载器
+```  
+{"key":"2","value":"2"}  
+{"key":"1","value":"1"}  
+```  
 
-## 说明
+## 加载器  
 
-有时候我们需要在 cache 初始化的时候，添加对应的数据初始化。
+存储之后，可以使用对应的加载器读取文件内容：  
 
-后期可以从文件等地方加载数据。
+```java  
+ICache<String, String> cache = CacheBs.<String, String>newInstance()  
+        .load(CacheLoads.<String, String>dbJson("1.rdb"))        .build();  
+Assert.  
 
-## 实现
+assertEquals(2,cache.size());  
+```  
 
-实现 `ICacheLoad` 接口即可。
+# 后期 Road-MAP  
 
-```java
-public class MyCacheLoad implements ICacheLoad<String, String> {
+## 淘汰策略  
 
-    @Override
-    public void load(ICache<String, String> cache) {
-        cache.put("1", "1");
-        cache.put("2", "2");
-    }
+- [ ] CLOCK 算法  
+- [ ] SC 二次机会  
+- [ ] 老化算法  
+- [ ] 弱引用  
 
-}
-```
+## 过期特性  
 
-我们在缓存初始化的时候，放入 2 个元素。
+- [ ] 过期策略添加随机返回  
+- [ ] expireAfterWrite()  
+- [ ] expireAfterAccess()  
 
-## 测试效果
+## 持久化  
 
-```java
-ICache<String, String> cache = CacheBs.<String, String>newInstance()
-        .load(new MyCacheLoad())
-        .build();
+- [ ] AOF 混合 RDB  
 
-Assert.
+## 统计  
 
-assertEquals(2,cache.size());
-```
+- [ ] 命中率  
+- [ ] keys 数量  
+- [ ] evict 数量  
+- [ ] expire 数量  
+- [ ] 耗时统计  
 
-# 添加 persist 持久化类
+## 并发  
 
-## 说明
+- [ ] 并发安全保障  
 
-如果我们只是把文件放在内存中，应用重启信息就丢失了。
+## 其他  
 
-有时候我们希望这些 key/value 信息可以持久化，存储到文件或者 database 中。
+- [ ] 异步 callable 操作  
+- [ ] spring 整合  
 
-## 持久化
+提供 `@Cacheable` 系列注解  
 
-`CachePersists.<String, String>dbJson("1.rdb")` 指定将数据文件持久化到文件中。
-
-定期执行，暂时全量持久化的间隔为 10min，后期考虑支持更多配置。
-
-```java
-public void persistTest() throws InterruptedException {
-    ICache<String, String> cache = CacheBs.<String, String>newInstance()
-            .load(new MyCacheLoad())
-            .persist(CachePersists.<String, String>dbJson("1.rdb"))
-            .build();
-
-    Assert.assertEquals(2, cache.size());
-    TimeUnit.SECONDS.sleep(5);
-}
-```
-
-- 1.rdb
-
-文件内容如下：
-
-```
-{"key":"2","value":"2"}
-{"key":"1","value":"1"}
-```
-
-## 加载器
-
-存储之后，可以使用对应的加载器读取文件内容：
-
-```java
-ICache<String, String> cache = CacheBs.<String, String>newInstance()
-        .load(CacheLoads.<String, String>dbJson("1.rdb"))
-        .build();
-
-Assert.
-
-assertEquals(2,cache.size());
-```
-
-# 后期 Road-MAP
-
-## 淘汰策略
-
-- [ ] CLOCK 算法
-
-- [ ] SC 二次机会
-
-- [ ] 老化算法
-
-- [ ] 弱引用
-
-## 过期特性
-
-- [ ] 过期策略添加随机返回
-
-- [ ] expireAfterWrite()
-
-- [ ] expireAfterAccess()
-
-## 持久化
-
-- [ ] AOF 混合 RDB
-
-## 统计
-
-- [ ] 命中率
-
-- [ ] keys 数量
-
-- [ ] evict 数量
-
-- [ ] expire 数量
-
-- [ ] 耗时统计
-
-## 并发
-
-- [ ] 并发安全保障
-
-## 其他
-
-- [ ] 异步 callable 操作
-
-- [ ] spring 整合
-
-提供 `@Cacheable` 系列注解
-
-- [ ] 文件压缩
-
-- [ ] 独立服务端
+- [ ] 文件压缩  
+- [ ] 独立服务端  
 
 提供类似于 redis-server + redis-client 的拆分，便于独立于应用作为服务存在。

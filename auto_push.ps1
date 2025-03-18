@@ -31,4 +31,4 @@ function Push-Auto
 }
 
 
-Push-Auto -time 10
+Push-Auto -time 6

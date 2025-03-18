@@ -28,7 +28,7 @@ public class CacheBsTest {
      */
     @Test
     public void helloTest() {
-        int maxSize = 4;
+        int maxSize = 2;
         ICache<String, String> cache = CacheBs.<String, String>newInstance()
                 .size(maxSize)
                 .build();
@@ -49,10 +49,11 @@ public class CacheBsTest {
      */
     @Test
     public void configTest() {
+        int maxSize = 3;
         ICache<String, String> cache = CacheBs.<String, String>newInstance()
                 .map(Maps.<String, String>hashMap())
-                .evict(CacheEvicts.<String, String>fifo())
-                .size(2)
+                .evict(CacheEvicts.<String, String>lru())
+                .size(maxSize)
                 .build();
 
         cache.put("1", "1");
@@ -60,7 +61,7 @@ public class CacheBsTest {
         cache.put("3", "3");
         cache.put("4", "4");
 
-        Assert.assertEquals(2, cache.size());
+        Assert.assertEquals(maxSize, cache.size());
         System.out.println(cache.keySet());
     }
 
@@ -78,7 +79,7 @@ public class CacheBsTest {
         cache.put("1", "1");
         cache.put("2", "2");
 
-        cache.expire("1", 40);
+        cache.expire("1", 10);
         Assert.assertEquals(2, cache.size());
 
         TimeUnit.MILLISECONDS.sleep(50);
@@ -128,8 +129,8 @@ public class CacheBsTest {
                 .persist(CachePersists.<String, String>dbJson("1.rdb"))
                 .build();
 
-        Assert.assertEquals(2, cache.size());
-        TimeUnit.SECONDS.sleep(5);
+        Assert.assertEquals(4, cache.size());
+        TimeUnit.SECONDS.sleep(3);
     }
 
     /**
@@ -143,7 +144,7 @@ public class CacheBsTest {
                 .load(CacheLoads.<String, String>dbJson("1.rdb"))
                 .build();
 
-        Assert.assertEquals(2, cache.size());
+        Assert.assertEquals(3, cache.size());
     }
 
     /**

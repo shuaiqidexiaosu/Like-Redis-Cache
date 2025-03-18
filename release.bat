@@ -77,4 +77,3 @@ ECHO "3. PUSH TO MAVEN CENTER DONE."
 ::ECHO "5. MODIFY %release_version% TO %snapshot_new_version% DONE."
 ::
 ::ECHO "============================= RELEASE END..."
-
