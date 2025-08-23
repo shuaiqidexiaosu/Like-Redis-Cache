@@ -10,7 +10,8 @@ import com.sjy.api.ICacheEvict;
  */
 public final class CacheEvicts {
 
-    private CacheEvicts(){}
+    private CacheEvicts() {
+    }
 
     /**
      * 无策略
@@ -50,8 +51,9 @@ public final class CacheEvicts {
 
     /**
      * LRU 驱除策略
-     *
+     * <p>
      * 基于双向链表 + map 实现
+     *
      * @param <K> key
      * @param <V> value
      * @return 结果
@@ -64,8 +66,9 @@ public final class CacheEvicts {
 
     /**
      * LRU 驱除策略
-     *
+     * <p>
      * 基于LinkedHashMap
+     *
      * @param <K> key
      * @param <V> value
      * @return 结果
@@ -77,21 +80,9 @@ public final class CacheEvicts {
 
     /**
      * LRU 驱除策略
-     *
-     * 基于 2Q 实现
-     * @param <K> key
-     * @param <V> value
-     * @return 结果
-     * @since 0.0.13
-     */
-    public static <K, V> ICacheEvict<K, V> lru2Q() {
-        return new CacheEvictLru2Q<>();
-    }
-
-    /**
-     * LRU 驱除策略
-     *
+     * <p>
      * 基于 LRU-2 实现
+     *
      * @param <K> key
      * @param <V> value
      * @return 结果
@@ -102,9 +93,25 @@ public final class CacheEvicts {
     }
 
     /**
-     * LFU 驱除策略
+     * LRU 驱除策略
+     * <p>
+     * 基于 2Q 实现
      *
+     * @param <K> key
+     * @param <V> value
+     * @return 结果
+     * @since 0.0.13
+     */
+    public static <K, V> ICacheEvict<K, V> lru2Q() {
+        return new CacheEvictLru2Q<>();
+    }
+
+
+    /**
+     * LFU 驱除策略
+     * <p>
      * 基于 LFU 实现
+     *
      * @param <K> key
      * @param <V> value
      * @return 结果
@@ -116,6 +123,7 @@ public final class CacheEvicts {
 
     /**
      * 时钟算法
+     *
      * @param <K> key
      * @param <V> value
      * @return 结果

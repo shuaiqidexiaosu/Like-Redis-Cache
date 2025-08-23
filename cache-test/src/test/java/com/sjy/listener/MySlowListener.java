@@ -14,6 +14,13 @@ public class MySlowListener implements ICacheSlowListener {
         System.out.println("【慢日志】name: " + context.methodName());
     }
 
+    /**
+     *  设置超过多少秒算慢日志
+     * @since: 0.0.1
+     * @author: 智慧的苏苏
+     * @date: 2025/3/18 下午4:55
+     * @return: long
+     */
     @Override
     public long slowerThanMills() {
         return 0;

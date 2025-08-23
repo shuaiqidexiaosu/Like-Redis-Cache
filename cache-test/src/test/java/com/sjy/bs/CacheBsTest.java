@@ -11,6 +11,8 @@ import com.sjy.support.persist.CachePersists;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -94,13 +96,12 @@ public class CacheBsTest {
      */
     @Test
     public void cacheRemoveListenerTest() {
-        ICache<String, String> cache = CacheBs.<String, String>newInstance()
+        ICache<String, List<String>> cache = CacheBs.<String, List<String>>newInstance()
                 .size(1)
-                .addRemoveListener(new MyRemoveListener<String, String>())
+                .addRemoveListener(new MyRemoveListener<String, List<String>>())
                 .build();
-
-        cache.put("1", "1");
-        cache.put("2", "2");
+        cache.put("1", new ArrayList<String>());
+        cache.put("2", new ArrayList<String>());
     }
 
     /**
@@ -129,7 +130,7 @@ public class CacheBsTest {
                 .persist(CachePersists.<String, String>dbJson("1.rdb"))
                 .build();
 
-        Assert.assertEquals(4, cache.size());
+        Assert.assertEquals(6, cache.size());
         TimeUnit.SECONDS.sleep(3);
     }
 
